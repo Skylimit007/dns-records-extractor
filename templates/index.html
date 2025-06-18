@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNS Extractor | Next Edge Innovations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+        
+        .record-card {
+            transition: all 0.3s ease;
+        }
+        
+        .record-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .yaml-output {
+            font-family: 'Courier New', monospace;
+            min-height: 300px;
+            white-space: pre;
+            overflow-x: auto;
+        }
+        
+        .footer-link:hover {
+            color: #a5b4fc;
+        }
+        
+        /* Loading spinner animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <img src="https://www.nextedgeinnovations.org/images/logo.png" alt="Logo" class="h-10 w-10">
+                    <h1 class="text-2xl font-bold">Next Edge Innovations</h1>
+                </div>
+                <nav class="hidden md:block">
+                    <ul class="flex space-x-6">
+                        <li><a href="https://www.nextedgeinnovations.org/index.html" class="hover:text-indigo-200 transition">Home</a></li>
+                        <li><a href="https://www.nextedgeinnovations.org/applications-login.html" class="hover:text-indigo-200 transition">Products</a></li>
+                        <li><a href="https://www.nextedgeinnovations.org/about.html" class="hover:text-indigo-200 transition">About</a></li>
+                        <li><a href="https://www.nextedgeinnovations.org/contact.html" class="hover:text-indigo-200 transition">Contact</a></li>
+                    </ul>
+                </nav>
+                <button class="md:hidden text-2xl" id="mobileMenuButton">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu (hidden by default) -->
+    <div id="mobileMenu" class="hidden md:hidden bg-indigo-800 text-white">
+        <div class="container mx-auto px-4 py-4">
+            <ul class="space-y-3">
+                <li><a href="#" class="block py-2 hover:text-indigo-200 transition">Home</a></li>
+                <li><a href="#" class="block py-2 hover:text-indigo-200 transition">Services</a></li>
+                <li><a href="#" class="block py-2 hover:text-indigo-200 transition">Products</a></li>
+                <li><a href="#" class="block py-2 hover:text-indigo-200 transition">About</a></li>
+                <li><a href="#" class="block py-2 hover:text-indigo-200 transition">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4">DNS Extractor</h1>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Easily extract your DNS records from your service provider in YAML format for seamless migration.
+                </p>
+            </div>
+
+            <!-- Input Card -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8 record-card">
+                <div class="p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-server mr-3 text-indigo-600"></i>
+                        DNS Information
+                    </h2>
+                    <form id="dnsForm" class="space-y-4">
+                        <div>
+                            <label for="domain" class="block text-sm font-medium text-gray-700 mb-1">Domain Name *</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-globe text-gray-400"></i>
+                                </div>
+                                <input type="text" id="domain" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="example.com" required>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="nameserver" class="block text-sm font-medium text-gray-700 mb-1">Nameserver (optional, for AXFR)</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-network-wired text-gray-400"></i>
+                                </div>
+                                <input type="text" id="nameserver" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="ns1.example.com">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="w-full gradient-bg text-white py-3 px-4 rounded-lg font-medium hover:opacity-90 transition flex items-center justify-center">
+                            <i class="fas fa-cloud-download-alt mr-2"></i>
+                            Extract DNS Records
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- YAML Output Card -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8 record-card">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
+                            <i class="fas fa-file-code mr-3 text-indigo-600"></i>
+                            Cloudflare YAML Configuration
+                        </h2>
+                        <div class="flex space-x-2">
+                            <button id="copyYaml" class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-lg font-medium transition flex items-center">
+                                <i class="fas fa-copy mr-2"></i>
+                                Copy
+                            </button>
+                            <button id="downloadYaml" class="bg-green-100 hover:bg-green-200 text-green-800 py-2 px-4 rounded-lg font-medium transition flex items-center">
+                                <i class="fas fa-download mr-2"></i>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="yamlOutput" class="yaml-output w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" readonly></textarea>
+                </div>
+            </div>
+
+            <!-- Records Output Card -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden record-card">
+                <div class="p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-list-ul mr-3 text-indigo-600"></i>
+                        Extracted DNS Records
+                    </h2>
+                    <div id="recordsOutput" class="space-y-6">
+                        <p class="text-gray-500 text-center py-8">Submit a domain to see extracted DNS records.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <img src="https://www.nextedgeinnovations.org/images/logo.png" alt="Logo" class="h-10 w-10">
+                        Next Edge Innovations
+                    </h3>
+                    <p class="text-gray-400">
+                        Innovating the future of cloud infrastructure and DNS management solutions.
+                    </p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="https://www.nextedgeinnovations.org/index.html" class="footer-link text-gray-400 hover:text-indigo-300 transition">Home</a></li>
+                        <li><a href="https://www.nextedgeinnovations.org/index.html" class="footer-link text-gray-400 hover:text-indigo-300 transition">Services</a></li>
+                        <li><a href="https://www.nextedgeinnovations.org/about.html" class="footer-link text-gray-400 hover:text-indigo-300 transition">About Us</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Services</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="footer-link text-gray-400 hover:text-indigo-300 transition">DNS Management</a></li>
+                        <li><a href="#" class="footer-link text-gray-400 hover:text-indigo-300 transition">Cloud Migration</a></li>
+                        <li><a href="#" class="footer-link text-gray-400 hover:text-indigo-300 transition">Security Solutions</a></li>
+                        <li><a href="#" class="footer-link text-gray-400 hover:text-indigo-300 transition">Consulting</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-gray-400"></i>
+                            <span class="text-gray-400">Mbagathi Way, Nairobi City</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone-alt mr-2 text-gray-400"></i>
+                            <span class="text-gray-400">+254700298334</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2 text-gray-400"></i>
+                            <span class="text-gray-400">info@nextedgeinnovations.org</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2023 Next Edge Innovations. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobileMenuButton').addEventListener('click', function() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        });
+
+        document.getElementById('dnsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const domain = document.getElementById('domain').value.trim();
+            const nameserver = document.getElementById('nameserver').value.trim();
+            
+            if (!domain) {
+                alert('Please enter a domain name');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i> Processing...';
+            
+            try {
+                // Make API call to your backend
+                const response = await fetch('/extract', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        domain: domain,
+                        nameserver: nameserver || null
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Display YAML
+                document.getElementById('yamlOutput').value = data.yaml;
+                
+                // Display records
+                let recordsHtml = '';
+                for (const [type, entries] of Object.entries(data.records)) {
+                    if (entries.length === 0) continue;
+                    
+                    // Determine icon based on record type
+                    let icon;
+                    switch(type) {
+                        case 'A': icon = 'fa-desktop'; break;
+                        case 'AAAA': icon = 'fa-desktop'; break;
+                        case 'CNAME': icon = 'fa-link'; break;
+                        case 'MX': icon = 'fa-envelope'; break;
+                        case 'TXT': icon = 'fa-font'; break;
+                        case 'NS': icon = 'fa-network-wired'; break;
+                        case 'SRV': icon = 'fa-exchange-alt'; break;
+                        case 'CAA': icon = 'fa-lock'; break;
+                        default: icon = 'fa-list-ul';
+                    }
+                    
+                    recordsHtml += `
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h3 class="text-lg font-medium text-gray-800 mb-3 flex items-center">
+                                <i class="fas ${icon} mr-2 text-indigo-500"></i>
+                                ${type} Records
+                            </h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-100">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TTL</th>
+                                            ${type === 'MX' || type === 'SRV' ? '<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>' : ''}
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">`;
+                    
+                    for (const entry of entries) {
+                        recordsHtml += `
+                                        <tr>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${entry.name || '@'}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${entry.value}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${entry.ttl || 'Auto'}</td>
+                                            ${type === 'MX' || type === 'SRV' ? `<td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${entry.priority || entry.preference || 'N/A'}</td>` : ''}
+                                        </tr>`;
+                    }
+                    
+                    recordsHtml += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>`;
+                }
+                
+                document.getElementById('recordsOutput').innerHTML = recordsHtml || '<p class="text-gray-500 text-center py-8">No records found for this domain.</p>';
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-cloud-download-alt mr-2"></i> Extract DNS Records';
+            }
+        });
+        
+        document.getElementById('copyYaml').addEventListener('click', function() {
+            const yamlOutput = document.getElementById('yamlOutput');
+            yamlOutput.select();
+            document.execCommand('copy');
+            
+            // Show copied notification
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-check mr-2"></i> Copied!';
+            setTimeout(() => {
+                this.innerHTML = originalText;
+            }, 2000);
+        });
+        
+        document.getElementById('downloadYaml').addEventListener('click', function() {
+            const yaml = document.getElementById('yamlOutput').value;
+            if (!yaml.trim()) {
+                alert('No YAML configuration to download');
+                return;
+            }
+            
+            const domain = document.getElementById('domain').value.trim() || 'dns-records';
+            const blob = new Blob([yaml], { type: 'text/yaml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${domain}-cloudflare-dns.yaml`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // Show downloaded notification
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-check mr-2"></i> Downloaded!';
+            setTimeout(() => {
+                this.innerHTML = originalText;
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
