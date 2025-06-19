@@ -47,6 +47,24 @@
         .animate-spin {
             animation: spin 1s linear infinite;
         }
+        
+        /* Tab styling */
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -77,11 +95,10 @@
     <div id="mobileMenu" class="hidden md:hidden bg-indigo-800 text-white">
         <div class="container mx-auto px-4 py-4">
             <ul class="space-y-3">
-                <li><a href="#" class="block py-2 hover:text-indigo-200 transition">Home</a></li>
-                <li><a href="#" class="block py-2 hover:text-indigo-200 transition">Services</a></li>
-                <li><a href="#" class="block py-2 hover:text-indigo-200 transition">Products</a></li>
-                <li><a href="#" class="block py-2 hover:text-indigo-200 transition">About</a></li>
-                <li><a href="#" class="block py-2 hover:text-indigo-200 transition">Contact</a></li>
+                <li><a href="https://www.nextedgeinnovations.org/index.html" class="block py-2 hover:text-indigo-200 transition">Home</a></li>
+                <li><a href="https://www.nextedgeinnovations.org/applications-login.html" class="block py-2 hover:text-indigo-200 transition">Products</a></li>
+                <li><a href="https://www.nextedgeinnovations.org/about.html" class="block py-2 hover:text-indigo-200 transition">About</a></li>
+                <li><a href="https://www.nextedgeinnovations.org/contact.html" class="block py-2 hover:text-indigo-200 transition">Contact</a></li>
             </ul>
         </div>
     </div>
@@ -132,38 +149,89 @@
                 </div>
             </div>
 
-            <!-- YAML Output Card -->
+            <!-- Results Tabs -->
             <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8 record-card">
+                <div class="border-b border-gray-200">
+                    <nav class="flex -mb-px">
+                        <button id="yamlTab" class="tab-button active py-4 px-6 text-center border-b-2 font-medium text-sm border-indigo-500 text-indigo-600">
+                            <i class="fas fa-file-code mr-2"></i> Cloudflare YAML
+                        </button>
+                        <button id="recordsTab" class="tab-button py-4 px-6 text-center border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                            <i class="fas fa-list-ul mr-2"></i> DNS Records
+                        </button>
+                        <button id="whoisTab" class="tab-button py-4 px-6 text-center border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                            <i class="fas fa-info-circle mr-2"></i> WHOIS Info
+                        </button>
+                    </nav>
+                </div>
+                
+                <!-- Tab Contents -->
                 <div class="p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
-                            <i class="fas fa-file-code mr-3 text-indigo-600"></i>
-                            Cloudflare YAML Configuration
+                    <!-- YAML Tab Content -->
+                    <div id="yamlContent" class="tab-content active">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                <i class="fas fa-file-code mr-3 text-indigo-600"></i>
+                                Cloudflare YAML Configuration
+                            </h2>
+                            <div class="flex space-x-2">
+                                <button id="copyYaml" class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-lg font-medium transition flex items-center">
+                                    <i class="fas fa-copy mr-2"></i>
+                                    Copy
+                                </button>
+                                <button id="downloadYaml" class="bg-green-100 hover:bg-green-200 text-green-800 py-2 px-4 rounded-lg font-medium transition flex items-center">
+                                    <i class="fas fa-download mr-2"></i>
+                                    Download
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="yamlOutput" class="yaml-output w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" readonly></textarea>
+                    </div>
+                    
+                    <!-- Records Tab Content -->
+                    <div id="recordsContent" class="tab-content">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-list-ul mr-3 text-indigo-600"></i>
+                            Extracted DNS Records
                         </h2>
-                        <div class="flex space-x-2">
-                            <button id="copyYaml" class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-lg font-medium transition flex items-center">
-                                <i class="fas fa-copy mr-2"></i>
-                                Copy
-                            </button>
-                            <button id="downloadYaml" class="bg-green-100 hover:bg-green-200 text-green-800 py-2 px-4 rounded-lg font-medium transition flex items-center">
-                                <i class="fas fa-download mr-2"></i>
-                                Download
-                            </button>
+                        <div id="recordsOutput" class="space-y-6">
+                            <p class="text-gray-500 text-center py-8">Submit a domain to see extracted DNS records.</p>
                         </div>
                     </div>
-                    <textarea id="yamlOutput" class="yaml-output w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" readonly></textarea>
+                    
+                    <!-- WHOIS Tab Content -->
+                    <div id="whoisContent" class="tab-content">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-info-circle mr-3 text-indigo-600"></i>
+                            WHOIS Information
+                        </h2>
+                        <div id="whoisOutput" class="space-y-6">
+                            <p class="text-gray-500 text-center py-8">Submit a domain to see WHOIS information.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- Records Output Card -->
-            <div class="bg-white rounded-xl shadow-md overflow-hidden record-card">
+            
+            <!-- Nameserver Info Card -->
+            <div id="nameserverCard" class="bg-white rounded-xl shadow-md overflow-hidden record-card hidden">
                 <div class="p-6">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-list-ul mr-3 text-indigo-600"></i>
-                        Extracted DNS Records
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-network-wired mr-3 text-indigo-600"></i>
+                        Nameserver Information
                     </h2>
-                    <div id="recordsOutput" class="space-y-6">
-                        <p class="text-gray-500 text-center py-8">Submit a domain to see extracted DNS records.</p>
+                    <div id="nameserverOutput" class="space-y-4">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-700 mb-2">Used Nameserver for Query:</h3>
+                            <p id="usedNameserver" class="text-gray-800 font-mono bg-gray-100 p-2 rounded"></p>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-700 mb-2">WHOIS Nameservers:</h3>
+                            <div id="whoisNameservers" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-700 mb-2">Cloudflare DNS Nameservers:</h3>
+                            <div id="cloudflareNameservers" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -193,7 +261,7 @@
                     <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
                     <ul class="space-y-2">
                         <li><a href="https://www.nextedgeinnovations.org/index.html" class="footer-link text-gray-400 hover:text-indigo-300 transition">Home</a></li>
-                        <li><a href="https://www.nextedgeinnovations.org/index.html" class="footer-link text-gray-400 hover:text-indigo-300 transition">Services</a></li>
+                        <li><a href="https://www.nextedgeinnovations.org/applications-login.html" class="footer-link text-gray-400 hover:text-indigo-300 transition">Products</a></li>
                         <li><a href="https://www.nextedgeinnovations.org/about.html" class="footer-link text-gray-400 hover:text-indigo-300 transition">About Us</a></li>
                     </ul>
                 </div>
@@ -240,6 +308,39 @@
             menu.classList.toggle('hidden');
         });
 
+        // Tab switching functionality
+        const tabs = {
+            yaml: {
+                button: document.getElementById('yamlTab'),
+                content: document.getElementById('yamlContent')
+            },
+            records: {
+                button: document.getElementById('recordsTab'),
+                content: document.getElementById('recordsContent')
+            },
+            whois: {
+                button: document.getElementById('whoisTab'),
+                content: document.getElementById('whoisContent')
+            }
+        };
+
+        // Add click event listeners to all tabs
+        Object.entries(tabs).forEach(([tabName, tab]) => {
+            tab.button.addEventListener('click', () => {
+                // Remove active class from all tabs
+                Object.values(tabs).forEach(t => {
+                    t.button.classList.remove('active', 'border-indigo-500', 'text-indigo-600');
+                    t.button.classList.add('border-transparent', 'text-gray-500');
+                    t.content.classList.remove('active');
+                });
+                
+                // Add active class to clicked tab
+                tab.button.classList.add('active', 'border-indigo-500', 'text-indigo-600');
+                tab.button.classList.remove('border-transparent', 'text-gray-500');
+                tab.content.classList.add('active');
+            });
+        });
+
         document.getElementById('dnsForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -280,7 +381,7 @@
                 }
                 
                 // Display YAML
-                document.getElementById('yamlOutput').value = data.yaml;
+                document.getElementById('yamlOutput').value = data.yaml || '# No YAML configuration generated';
                 
                 // Display records
                 let recordsHtml = '';
@@ -338,6 +439,96 @@
                 
                 document.getElementById('recordsOutput').innerHTML = recordsHtml || '<p class="text-gray-500 text-center py-8">No records found for this domain.</p>';
                 
+                // Display WHOIS information
+                let whoisHtml = '<div class="bg-gray-50 rounded-lg p-4">';
+                if (data.whois) {
+                    whoisHtml += `
+                        <h3 class="text-lg font-medium text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-info-circle mr-2 text-indigo-500"></i>
+                            Domain Information
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Domain Name</h4>
+                                <p class="mt-1 text-sm text-gray-900">${data.whois.domain_name || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Registrar</h4>
+                                <p class="mt-1 text-sm text-gray-900">${data.whois.registrar || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Creation Date</h4>
+                                <p class="mt-1 text-sm text-gray-900">${Array.isArray(data.whois.creation_date) ? data.whois.creation_date[0] : data.whois.creation_date || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Expiration Date</h4>
+                                <p class="mt-1 text-sm text-gray-900">${Array.isArray(data.whois.expiration_date) ? data.whois.expiration_date[0] : data.whois.expiration_date || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Updated Date</h4>
+                                <p class="mt-1 text-sm text-gray-900">${Array.isArray(data.whois.updated_date) ? data.whois.updated_date[0] : data.whois.updated_date || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Status</h4>
+                                <p class="mt-1 text-sm text-gray-900">${Array.isArray(data.whois.status) ? data.whois.status.join(', ') : data.whois.status || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">DNSSEC</h4>
+                                <p class="mt-1 text-sm text-gray-900">${data.whois.dnssec || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Organization</h4>
+                                <p class="mt-1 text-sm text-gray-900">${data.whois.org || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500">Country</h4>
+                                <p class="mt-1 text-sm text-gray-900">${data.whois.country || 'N/A'}</p>
+                            </div>
+                        </div>`;
+                } else {
+                    whoisHtml += '<p class="text-gray-500 text-center py-8">No WHOIS information available for this domain.</p>';
+                }
+                whoisHtml += '</div>';
+                document.getElementById('whoisOutput').innerHTML = whoisHtml;
+                
+                // Display nameserver information
+                if (data.used_nameserver || data.whois?.name_servers || data.cloudflare_ns) {
+                    document.getElementById('nameserverCard').classList.remove('hidden');
+                    
+                    // Show used nameserver
+                    document.getElementById('usedNameserver').textContent = data.used_nameserver || 'Automatically detected';
+                    
+                    // Show WHOIS nameservers
+                    const whoisNsContainer = document.getElementById('whoisNameservers');
+                    whoisNsContainer.innerHTML = '';
+                    if (data.whois?.name_servers?.length > 0) {
+                        data.whois.name_servers.forEach(ns => {
+                            const nsElement = document.createElement('div');
+                            nsElement.className = 'bg-gray-100 p-2 rounded text-sm font-mono';
+                            nsElement.textContent = ns;
+                            whoisNsContainer.appendChild(nsElement);
+                        });
+                    } else {
+                        whoisNsContainer.innerHTML = '<p class="text-gray-500">No nameservers found in WHOIS data</p>';
+                    }
+                    
+                    // Show Cloudflare nameservers
+                    const cloudflareNsContainer = document.getElementById('cloudflareNameservers');
+                    cloudflareNsContainer.innerHTML = '';
+                    if (data.cloudflare_ns?.length > 0) {
+                        data.cloudflare_ns.forEach(ns => {
+                            const nsElement = document.createElement('div');
+                            nsElement.className = 'bg-blue-100 p-2 rounded text-sm font-mono';
+                            nsElement.textContent = ns;
+                            cloudflareNsContainer.appendChild(nsElement);
+                        });
+                    } else {
+                        cloudflareNsContainer.innerHTML = '<p class="text-gray-500">No nameservers found via Cloudflare DNS</p>';
+                    }
+                } else {
+                    document.getElementById('nameserverCard').classList.add('hidden');
+                }
+                
             } catch (error) {
                 console.error('Error:', error);
                 alert('An error occurred: ' + error.message);
@@ -362,7 +553,7 @@
         
         document.getElementById('downloadYaml').addEventListener('click', function() {
             const yaml = document.getElementById('yamlOutput').value;
-            if (!yaml.trim()) {
+            if (!yaml.trim() || yaml.trim() === '# No YAML configuration generated') {
                 alert('No YAML configuration to download');
                 return;
             }

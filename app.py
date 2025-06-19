@@ -5,6 +5,8 @@ import dns.query
 import dns.rdatatype
 import json
 from io import StringIO
+import whois  # New import for WHOIS functionality
+from datetime import datetime  # For date handling in WHOIS results
 
 app = Flask(__name__)
 
@@ -61,6 +63,31 @@ def get_dns_records(domain, nameserver=None):
             print(f"Error fetching {record_type} records: {e}")
     
     return records
+
+def get_whois_info(domain):
+    """Perform WHOIS lookup for a domain"""
+    try:
+        domain_info = whois.whois(domain)
+        
+        # Convert dates to strings for JSON serialization
+        def process_dates(obj):
+            if isinstance(obj, datetime):
+                return obj.strftime('%Y-%m-%d %H:%M:%S')
+            elif isinstance(obj, list):
+                return [process_dates(item) for item in obj]
+            elif isinstance(obj, dict):
+                return {k: process_dates(v) for k, v in obj.items()}
+            return obj
+        
+        # Process the WHOIS data to make it JSON serializable
+        whois_data = {}
+        for key, value in domain_info.items():
+            whois_data[key] = process_dates(value)
+        
+        return whois_data
+    except Exception as e:
+        print(f"WHOIS lookup failed: {e}")
+        return {"error": str(e)}
 
 def convert_to_cloudflare_yaml(records, domain):
     """Convert DNS records to Cloudflare YAML format"""
@@ -123,13 +150,16 @@ def extract_dns():
     try:
         records = get_dns_records(domain, nameserver)
         cloudflare_yaml = convert_to_cloudflare_yaml(records, domain)
+        whois_info = get_whois_info(domain)
+        
         return jsonify({
             'success': True,
             'yaml': cloudflare_yaml,
-            'records': records
+            'records': records,
+            'whois': whois_info
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=10000)
